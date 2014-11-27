@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import message.ChatMessage;
 
 /**
@@ -18,11 +20,10 @@ import message.ChatMessage;
 public class ChatServer {
 
     static ArrayList<ServerClientBackend> clients = new ArrayList();
-    
     public static void main(String[] args) {
         try {
             // Start the server to listen port 3010
-            ServerSocket server = new ServerSocket(3013); 
+            ServerSocket server = new ServerSocket(3030); 
             
             while(true) {
                 Socket temp = server.accept();
@@ -32,6 +33,7 @@ public class ChatServer {
                 t.setDaemon(true);
                 t.start();
             }
+            
         } catch (IOException ex) {
             ex.printStackTrace();
         }
