@@ -20,6 +20,8 @@ import message.ChatMessage;
 public class ChatServer {
 
     static ArrayList<ServerClientBackend> clients = new ArrayList();
+    static ArrayList<String> usernames = new ArrayList();
+    
     public static void main(String[] args) {
         try {
             // Start the server to listen port 3010
@@ -29,6 +31,7 @@ public class ChatServer {
                 Socket temp = server.accept();
                 ServerClientBackend client = new ServerClientBackend(temp);
                 clients.add(client);
+                usernames.add("Anonymous");
                 Thread t = new Thread(client);
                 t.setDaemon(true);
                 t.start();
@@ -40,6 +43,43 @@ public class ChatServer {
     }
     
     public static void broadcastMessage(ChatMessage cm) {
+        for (ServerClientBackend client: clients) {
+            client.sendMessage(cm);
+        }
+    }
+    
+    public static void sendPrivateMessage(String name, ChatMessage cm) {
+        for (ServerClientBackend client: clients) {
+            if (client.getUsername().equalsIgnoreCase(name)) {
+                System.out.println("Private message receiver: " + client.getUsername());
+                client.sendMessage(cm);
+                break;
+            }
+        }
+       
+    }
+    
+    public static void removeUser(ServerClientBackend c) {
+        int index = clients.indexOf(c);
+        clients.remove(c);
+        usernames.remove(index);
+        System.out.println("User in " + index + " removed");
+        sendUserList();
+    }
+    
+    public static void changeUsername(ServerClientBackend c, String username) {
+        int index = clients.indexOf(c);
+        usernames.set(index, username);
+        sendUserList();
+    }
+    
+    public static void sendUserList() {
+        ChatMessage cm = new ChatMessage();
+        cm.setUserListUpdate(true);
+        cm.setChatMessage("");
+        for (String name : usernames) {
+            cm.setChatMessage(cm.getChatMessage() + name + ";");
+        }
         for (ServerClientBackend client: clients) {
             client.sendMessage(cm);
         }
